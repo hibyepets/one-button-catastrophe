@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina | Disrupting Light</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;700&family=JetBrains+Mono&display=swap');
+        
+        :root {
+            --accent: #eab308;
+            --bg: #050505;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg);
+            color: #fafafa;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .burn-ticker {
+            font-family: 'JetBrains Mono', monospace;
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .glow-hover:hover {
+            box-shadow: 0 0 30px rgba(234, 179, 8, 0.15);
+            border-color: rgba(234, 179, 8, 0.4);
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .scanline {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(234, 179, 8, 0.05), transparent);
+            animation: scanline 4s linear infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="main-frame" class="w-full max-w-2xl glass-card rounded-[2.5rem] p-10 relative overflow-hidden">
+        <div class="absolute inset-0 scanline pointer-events-none"></div>
+
+        <div class="flex justify-between items-end mb-12 border-b border-white/5 pb-8">
+            <div>
+                <span class="text-[10px] uppercase tracking-[0.4em] text-zinc-500 block mb-1">Seed Runway</span>
+                <span id="capital" class="burn-ticker text-3xl font-bold text-green-400 leading-none">$12,450,000</span>
+            </div>
+            <div class="text-right">
+                <span class="text-[10px] uppercase tracking-[0.4em] text-zinc-500 block mb-1">Hype Index</span>
+                <span class="burn-ticker text-xl text-yellow-500">98.4%</span>
+            </div>
+        </div>
+
+        <div id="screen" class="min-h-[350px] flex flex-col justify-center transition-all duration-700">
+            <div class="text-center animate-in fade-in zoom-in duration-1000">
+                <div class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-600 rounded-3xl mx-auto mb-8 flex items-center justify-center shadow-2xl shadow-orange-500/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+                </div>
+                <h1 class="text-5xl font-bold tracking-tighter mb-4 italic">Lumina<span class="font-thin not-italic opacity-40">OS</span></h1>
+                <p class="text-zinc-400 text-lg mb-10 max-w-sm mx-auto leading-relaxed">Stop turning on lights. Start launching illumination experiences.</p>
+                
+                <button onclick="navigate('provision')" class="group relative px-12 py-5 bg-white text-black font-bold rounded-2xl transition-all hover:scale-105 active:scale-95 glow-hover">
+                    INITIALIZE PHOTON STREAM
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-12">
+            <div id="log-box" class="font-mono text-[9px] text-zinc-600 uppercase flex flex-col gap-1 overflow-hidden h-12">
+                <div class="animate-pulse">> SYSTEM READY</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let capital = 12450000;
+        const capitalEl = document.getElementById('capital');
+        const screen = document.getElementById('screen');
+        const logBox = document.getElementById('log-box');
+
+        const branches = {
+            provision: {
+                title: "Asset Allocation",
+                text: "To illuminate, we must first 'Onboard' your environment to our cloud. Choose your priority focus:",
+                options: [
+                    { t: "Fast-Track Approval (Cost: $2M)", link: 'legal' },
+                    { t: "Organic Deployment (Wait 40s)", link: 'wait' }
+                ],
+                log: "ALLOCATING EDGE SERVERS... [OK]"
+            },
+            legal: {
+                title: "Compliance Layer",
+                text: "Our Legal AI has flagged your room for 'Potential Light Overuse'. We need a Strategic Pivot.",
+                options: [
+                    { t: "Pivot to 'Darkness-as-a-Service'", link: 'pivot' },
+                    { t: "Hire Lobbyists ($5M)", link: 'lobby' }
+                ],
+                log: "LEGAL HANDSHAKE INITIALIZED..."
+            },
+            wait: {
+                title: "The Loading Paradigm",
+                text: "While we wait for the photon molecules to align, would you like to view our 'Visionary Pitch Deck'?",
+                options: [
+                    { t: "View Slides", link: 'pivot' },
+                    { t: "Request a Refund", link: 'fail' }
+                ],
+                log: "RETENTION LOOP ENGAGED..."
+            },
+            lobby: {
+                title: "Political Win!",
+                text: "The lobbyists succeeded! But now the budget is gone. We have the right to turn on the light, but no money for the bulb.",
+                options: [{ t: "Declare Bankruptcy", link: 'fail' }],
+                log: "CAPITAL DRAIN EXTREME..."
+            },
+            pivot: {
+                title: "Series C: Darkness",
+                text: "Investors love the 'Darkness' pivot. You are now the #1 provider of shadows. No light is required.",
+                options: [{ t: "IPO at $4B Valuation", link: 'success' }],
+                log: "HYPER-GROWTH DETECTED..."
+            },
+            success: {
+                title: "Exit Achieved",
+                text: "You exited the startup with $500M. The light was never turned on, but the world is now 'Disrupted'.",
+                options: [{ t: "Found New Startup", link: 'start' }],
+                log: "LIQUIDITY EVENT DETECTED!"
+            },
+            fail: {
+                title: "Runway Depleted",
+                text: "The startup collapsed. You are now being sued by 14 different board members. The light stays off.",
+                options: [{ t: "Try Again", link: 'start' }],
+                log: "SYSTEM ERROR: CRITICAL FAILURE"
+            }
+        };
+
+        function addLog(msg) {
+            const div = document.createElement('div');
+            div.innerText = `> ${msg}`;
+            logBox.prepend(div);
+        }
+
+        function navigate(key) {
+            if (key === 'start') return location.reload();
+            
+            const node = branches[key];
+            
+            // Deduct random "Capital" for drama
+            capital -= Math.floor(Math.random() * 2000000) + 500000;
+            capitalEl.innerText = `$${Math.max(0, capital).toLocaleString()}`;
+            
+            if (capital <= 0) return navigate('fail');
+
+            addLog(node.log);
+
+            // Animate transition
+            screen.classList.add('opacity-0', 'translate-y-4');
+            
+            setTimeout(() => {
+                screen.innerHTML = `
+                    <div class="animate-in fade-in slide-in-from-bottom-8 duration-700">
+                        <h2 class="text-4xl font-bold text-white mb-6 italic tracking-tight">${node.title}</h2>
+                        <p class="text-zinc-400 text-lg mb-10 leading-relaxed">${node.text}</p>
+                        <div class="grid gap-4">
+                            ${node.options.map(o => `
+                                <button onclick="navigate('${o.link}')" class="w-full text-left p-6 border border-white/10 rounded-2xl hover:bg-white/5 hover:border-white/30 transition-all group flex justify-between items-center">
+                                    <span class="text-sm font-semibold tracking-wide">${o.t}</span>
+                                    <span class="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                screen.classList.remove('opacity-0', 'translate-y-4');
+            }, 400);
+        }
+    </script>
+</body>
+</html>
