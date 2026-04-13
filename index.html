@@ -3,189 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lumina | Disrupting Light</title>
+    <title>Lumina Ultra | The Series D Experience</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;700&family=JetBrains+Mono&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono&display=swap');
         
         :root {
-            --accent: #eab308;
-            --bg: #050505;
+            --primary: #eab308;
+            --bg: #030303;
+            --card: rgba(20, 20, 20, 0.8);
         }
 
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg);
-            color: #fafafa;
+            color: #e5e7eb;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        .burn-ticker {
-            font-family: 'JetBrains Mono', monospace;
-            text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
-        }
-
-        .glow-hover:hover {
-            box-shadow: 0 0 30px rgba(234, 179, 8, 0.15);
-            border-color: rgba(234, 179, 8, 0.4);
-        }
-
-        @keyframes scanline {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
-        }
-
-        .scanline {
-            height: 100%;
+        /* Center-aligned Glass Container */
+        .app-shell {
             width: 100%;
-            background: linear-gradient(to bottom, transparent, rgba(234, 179, 8, 0.05), transparent);
-            animation: scanline 4s linear infinite;
+            max-width: 900px;
+            height: 700px;
+            background: var(--card);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 40px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 100px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255,255,255,0.02);
+            z-index: 10;
+        }
+
+        .burn-bar { height: 4px; background: #22c55e; transition: width 0.8s ease; }
+        .burn-bar.danger { background: #ef4444; }
+
+        /* Fancy Animations */
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        .floating { animation: float 6s ease-in-out infinite; }
+
+        /* Notification Styling */
+        .toast {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            width: 300px;
+            background: rgba(30, 30, 30, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            border-radius: 12px;
+            transform: translateX(400px);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+        }
+        .toast.active { transform: translateX(0); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+        .choice-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .choice-btn:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        #meeting-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            border-radius: 40px;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <div id="main-frame" class="w-full max-w-2xl glass-card rounded-[2.5rem] p-10 relative overflow-hidden">
-        <div class="absolute inset-0 scanline pointer-events-none"></div>
+    <div class="absolute inset-0 z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-yellow-500/10 blur-[120px] rounded-full"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full"></div>
+    </div>
 
-        <div class="flex justify-between items-end mb-12 border-b border-white/5 pb-8">
+    <div id="toast" class="toast">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center text-xs">💬</div>
             <div>
-                <span class="text-[10px] uppercase tracking-[0.4em] text-zinc-500 block mb-1">Seed Runway</span>
-                <span id="capital" class="burn-ticker text-3xl font-bold text-green-400 leading-none">$12,450,000</span>
+                <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Slack from Chad (VP of Hype)</p>
+                <p id="toast-msg" class="text-sm text-zinc-200 font-medium italic">"We need to circle back on the photon density."</p>
             </div>
-            <div class="text-right">
-                <span class="text-[10px] uppercase tracking-[0.4em] text-zinc-500 block mb-1">Hype Index</span>
-                <span class="burn-ticker text-xl text-yellow-500">98.4%</span>
+        </div>
+    </div>
+
+    <div class="app-shell overflow-hidden">
+        
+        <div class="p-8 border-b border-white/5 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-yellow-500 rounded-xl flex items-center justify-center font-bold text-black shadow-lg shadow-yellow-500/20">L</div>
+                <div>
+                    <h1 class="font-extrabold tracking-tighter text-xl">Lumina Ultra</h1>
+                    <p class="text-[9px] uppercase tracking-[0.3em] text-zinc-500">Infrastructure as a Service</p>
+                </div>
+            </div>
+
+            <div class="flex gap-8">
+                <div class="text-right">
+                    <p class="text-[9px] uppercase tracking-widest text-zinc-500">Runway Burn</p>
+                    <p id="burn-rate" class="font-mono text-green-400 font-bold">$12,400 / click</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[9px] uppercase tracking-widest text-zinc-500">VC Funding</p>
+                    <p id="funding" class="font-mono text-white font-bold">$25,000,000</p>
+                </div>
             </div>
         </div>
 
-        <div id="screen" class="min-h-[350px] flex flex-col justify-center transition-all duration-700">
-            <div class="text-center animate-in fade-in zoom-in duration-1000">
-                <div class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-600 rounded-3xl mx-auto mb-8 flex items-center justify-center shadow-2xl shadow-orange-500/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+        <div id="burn-progress" class="burn-bar" style="width: 100%;"></div>
+
+        <div class="flex-1 overflow-y-auto p-12 flex flex-col items-center justify-center">
+            <div id="content-engine" class="w-full max-w-lg text-center">
+                <div class="floating mb-10">
+                    <svg class="mx-auto text-yellow-500 opacity-20" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
                 </div>
-                <h1 class="text-5xl font-bold tracking-tighter mb-4 italic">Lumina<span class="font-thin not-italic opacity-40">OS</span></h1>
-                <p class="text-zinc-400 text-lg mb-10 max-w-sm mx-auto leading-relaxed">Stop turning on lights. Start launching illumination experiences.</p>
-                
-                <button onclick="navigate('provision')" class="group relative px-12 py-5 bg-white text-black font-bold rounded-2xl transition-all hover:scale-105 active:scale-95 glow-hover">
-                    INITIALIZE PHOTON STREAM
+                <h2 class="text-4xl font-extrabold text-white mb-4 tracking-tight">System Hibernating.</h2>
+                <p class="text-zinc-400 mb-10 leading-relaxed">The light is currently in 'Concept Phase'. Please initiate the 12-step validation protocol to begin photon recruitment.</p>
+                <button onclick="gameState.next('init')" class="px-10 py-5 bg-white text-black font-black rounded-full hover:scale-105 active:scale-95 transition-all shadow-xl shadow-white/10 tracking-tighter">
+                    INITIALIZE ECOSYSTEM
                 </button>
             </div>
         </div>
 
-        <div class="mt-12">
-            <div id="log-box" class="font-mono text-[9px] text-zinc-600 uppercase flex flex-col gap-1 overflow-hidden h-12">
-                <div class="animate-pulse">> SYSTEM READY</div>
+        <div class="bg-black/40 p-4 border-t border-white/5 flex items-center justify-between font-mono text-[10px] text-zinc-600">
+            <div id="log-feed">> WAITING FOR STAKEHOLDER INPUT...</div>
+            <div class="flex gap-4">
+                <span>CPU: 0.02%</span>
+                <span>HYPE: 99.9%</span>
+            </div>
+        </div>
+
+        <div id="meeting-overlay">
+            <div class="bg-zinc-900 w-full max-w-md p-8 rounded-3xl border border-white/10 text-center shadow-2xl">
+                <div class="w-20 h-20 bg-blue-500/20 rounded-full mx-auto mb-6 flex items-center justify-center animate-pulse">
+                    <span class="text-3xl">🎥</span>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">Weekly All-Hands</h3>
+                <p class="text-zinc-400 text-sm mb-8">You are in the waiting room. The CEO is currently discussing his trip to Mars.</p>
+                <div class="space-y-3">
+                    <button onclick="gameState.closeMeeting()" class="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 transition-all">UNMUTE & AGREE</button>
+                    <button onclick="gameState.closeMeeting()" class="w-full py-4 border border-zinc-700 rounded-xl hover:bg-zinc-800 transition-all">SIT IN SILENT FURY</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        let capital = 12450000;
-        const capitalEl = document.getElementById('capital');
-        const screen = document.getElementById('screen');
-        const logBox = document.getElementById('log-box');
+        // GLOBAL STATE MANAGER
+        const gameState = {
+            funding: 25000000,
+            burnRate: 12400,
+            step: 0,
+            isAI: false,
+            
+            updateMetrics() {
+                const f = document.getElementById('funding');
+                const b = document.getElementById('burn-rate');
+                const p = document.getElementById('burn-progress');
+                
+                f.innerText = `$${this.funding.toLocaleString()}`;
+                b.innerText = `$${this.burnRate.toLocaleString()} / click`;
+                
+                const percentage = (this.funding / 25000000) * 100;
+                p.style.width = `${percentage}%`;
+                if(percentage < 30) p.classList.add('danger');
 
-        const branches = {
-            provision: {
-                title: "Asset Allocation",
-                text: "To illuminate, we must first 'Onboard' your environment to our cloud. Choose your priority focus:",
-                options: [
-                    { t: "Fast-Track Approval (Cost: $2M)", link: 'legal' },
-                    { t: "Organic Deployment (Wait 40s)", link: 'wait' }
-                ],
-                log: "ALLOCATING EDGE SERVERS... [OK]"
+                if(this.funding <= 0) this.render('bankruptcy');
             },
-            legal: {
-                title: "Compliance Layer",
-                text: "Our Legal AI has flagged your room for 'Potential Light Overuse'. We need a Strategic Pivot.",
-                options: [
-                    { t: "Pivot to 'Darkness-as-a-Service'", link: 'pivot' },
-                    { t: "Hire Lobbyists ($5M)", link: 'lobby' }
-                ],
-                log: "LEGAL HANDSHAKE INITIALIZED..."
+
+            log(msg) {
+                document.getElementById('log-feed').innerText = `> ${msg.toUpperCase()}`;
             },
-            wait: {
-                title: "The Loading Paradigm",
-                text: "While we wait for the photon molecules to align, would you like to view our 'Visionary Pitch Deck'?",
-                options: [
-                    { t: "View Slides", link: 'pivot' },
-                    { t: "Request a Refund", link: 'fail' }
-                ],
-                log: "RETENTION LOOP ENGAGED..."
+
+            notify(msg) {
+                const t = document.getElementById('toast');
+                document.getElementById('toast-msg').innerText = msg;
+                t.classList.add('active');
+                setTimeout(() => t.classList.remove('active'), 4000);
             },
-            lobby: {
-                title: "Political Win!",
-                text: "The lobbyists succeeded! But now the budget is gone. We have the right to turn on the light, but no money for the bulb.",
-                options: [{ t: "Declare Bankruptcy", link: 'fail' }],
-                log: "CAPITAL DRAIN EXTREME..."
+
+            triggerMeeting() {
+                document.getElementById('meeting-overlay').style.display = 'flex';
+                this.log("INTERRUPTED BY STANDUP MEETING");
             },
-            pivot: {
-                title: "Series C: Darkness",
-                text: "Investors love the 'Darkness' pivot. You are now the #1 provider of shadows. No light is required.",
-                options: [{ t: "IPO at $4B Valuation", link: 'success' }],
-                log: "HYPER-GROWTH DETECTED..."
+
+            closeMeeting() {
+                document.getElementById('meeting-overlay').style.display = 'none';
+                this.funding -= 500000;
+                this.updateMetrics();
+                this.render('agile');
             },
-            success: {
-                title: "Exit Achieved",
-                text: "You exited the startup with $500M. The light was never turned on, but the world is now 'Disrupted'.",
-                options: [{ t: "Found New Startup", link: 'start' }],
-                log: "LIQUIDITY EVENT DETECTED!"
+
+            render(stateKey) {
+                const engine = document.getElementById('content-engine');
+                const content = this.scenarios[stateKey];
+                
+                engine.style.opacity = '0';
+                engine.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    engine.innerHTML = `
+                        <div class="animate-in fade-in slide-in-from-bottom-8 duration-700">
+                            <h2 class="text-5xl font-extrabold text-white mb-6 tracking-tighter leading-none">${content.title}</h2>
+                            <p class="text-zinc-400 text-lg mb-10 leading-relaxed">${content.text}</p>
+                            <div class="grid gap-4">
+                                ${content.options.map(opt => `
+                                    <button onclick="gameState.next('${opt.link}')" class="choice-btn w-full p-6 rounded-2xl text-left flex justify-between items-center group">
+                                        <div>
+                                            <p class="font-bold text-white">${opt.label}</p>
+                                            <p class="text-xs text-zinc-500">${opt.sub}</p>
+                                        </div>
+                                        <span class="text-zinc-700 group-hover:text-yellow-500 transition-colors">→</span>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    engine.style.opacity = '1';
+                    engine.style.transform = 'translateY(0)';
+                }, 300);
             },
-            fail: {
-                title: "Runway Depleted",
-                text: "The startup collapsed. You are now being sued by 14 different board members. The light stays off.",
-                options: [{ t: "Try Again", link: 'start' }],
-                log: "SYSTEM ERROR: CRITICAL FAILURE"
+
+            next(key) {
+                this.funding -= this.burnRate;
+                this.burnRate += 50000; // Exponential bureaucracy
+                this.updateMetrics();
+                
+                if(Math.random() > 0.7 && key !== 'init') {
+                    this.notify("Priority-1 task assigned: Refactor the bulb filament.");
+                }
+
+                this.render(key);
+            },
+
+            scenarios: {
+                init: {
+                    title: "Validation Layer",
+                    text: "Before we emit a single photon, we must establish your 'Light-on' authority. How do you wish to proceed?",
+                    options: [
+                        { label: "AI-Powered Automation", sub: "Let the neural net decide brightness", link: 'ai_path' },
+                        { label: "Committee Approval", sub: "Submit a 40-page PDF to the board", link: 'bureaucracy' }
+                    ]
+                },
+                ai_path: {
+                    title: "Neural Synergy",
+                    text: "The AI is hallucinating. It thinks you want 'Ultra-Violet' light for a disco, but we don't have the budget.",
+                    options: [
+                        { label: "Pivot to Web3-Darkness", sub: "Mint the light switch as an NFT", link: 'pivot' },
+                        { label: "Force-Prompt the Bulb", sub: "Ignore safety guidelines", link: 'meeting_trigger' }
+                    ]
+                },
+                meeting_trigger: {
+                    title: "Security Breach",
+                    text: "Security protocols triggered. You are trying to turn a light on without a SOC-2 audit.",
+                    options: [
+                        { label: "Enter Waiting Room", sub: "Mandatory compliance sync", link: 'meeting_logic' }
+                    ]
+                },
+                meeting_logic: {
+                    title: "The All-Hands",
+                    text: "You are required to attend the meeting. No progress can be made until the CEO stops talking.",
+                    options: [{ label: "Click to Attend", sub: "Burn $500k instantly", link: 'trigger_meeting' }]
+                },
+                bureaucracy: {
+                    title: "Paperwork Void",
+                    text: "The board rejected your PDF because the font wasn't 'Visionary' enough. We need a rebrand.",
+                    options: [
+                        { label: "Hire Creative Agency", sub: "Cost: $4,000,000", link: 'agile' },
+                        { label: "Use Stock Icons", sub: "Immediate 'Dislike' from stakeholders", link: 'pivot' }
+                    ]
+                },
+                agile: {
+                    title: "The Sprint Loop",
+                    text: "We are in Sprint 42. We've optimized the loading screen, but the lightbulb hasn't been ordered yet.",
+                    options: [
+                        { label: "Declare MVP", sub: "Ship a broken flashlight", link: 'success' },
+                        { label: "Add 14 more features", sub: "Including 'Light Analytics'", link: 'pivot' }
+                    ]
+                },
+                pivot: {
+                    title: "Strategic Pivot",
+                    text: "We are no longer a light company. We are a 'Cloud-based Darkness Management' platform. Investors are thrilled.",
+                    options: [
+                        { label: "Liquidate Assets", sub: "Take the money and run", link: 'success' },
+                        { label: "Seek Series E Funding", sub: "Continue the nightmare", link: 'init' }
+                    ]
+                },
+                success: {
+                    title: "Exit Achieved!",
+                    text: "Congratulations. You sold the company for $4B. The light was never turned on, but you are now a Billionaire.",
+                    options: [{ label: "Found New Startup", sub: "Start the cycle again", link: 'restart' }]
+                },
+                bankruptcy: {
+                    title: "Game Over.",
+                    text: "You ran out of money. The office was repossessed by a rival AI startup. You are now in the dark forever.",
+                    options: [{ label: "Re-disrupt", sub: "Ask for more Seed money", link: 'restart' }]
+                }
             }
         };
 
-        function addLog(msg) {
-            const div = document.createElement('div');
-            div.innerText = `> ${msg}`;
-            logBox.prepend(div);
-        }
+        // Inject helper for the meeting logic
+        gameState.next = function(key) {
+            if (key === 'restart') return location.reload();
+            if (key === 'trigger_meeting') return this.triggerMeeting();
+            
+            this.funding -= this.burnRate;
+            this.burnRate += 25000;
+            this.updateMetrics();
+            this.render(key);
+            this.log(`Transitioning to ${key}...`);
+        };
 
-        function navigate(key) {
-            if (key === 'start') return location.reload();
-            
-            const node = branches[key];
-            
-            // Deduct random "Capital" for drama
-            capital -= Math.floor(Math.random() * 2000000) + 500000;
-            capitalEl.innerText = `$${Math.max(0, capital).toLocaleString()}`;
-            
-            if (capital <= 0) return navigate('fail');
-
-            addLog(node.log);
-
-            // Animate transition
-            screen.classList.add('opacity-0', 'translate-y-4');
-            
-            setTimeout(() => {
-                screen.innerHTML = `
-                    <div class="animate-in fade-in slide-in-from-bottom-8 duration-700">
-                        <h2 class="text-4xl font-bold text-white mb-6 italic tracking-tight">${node.title}</h2>
-                        <p class="text-zinc-400 text-lg mb-10 leading-relaxed">${node.text}</p>
-                        <div class="grid gap-4">
-                            ${node.options.map(o => `
-                                <button onclick="navigate('${o.link}')" class="w-full text-left p-6 border border-white/10 rounded-2xl hover:bg-white/5 hover:border-white/30 transition-all group flex justify-between items-center">
-                                    <span class="text-sm font-semibold tracking-wide">${o.t}</span>
-                                    <span class="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-                screen.classList.remove('opacity-0', 'translate-y-4');
-            }, 400);
-        }
+        window.onload = () => {
+            gameState.updateMetrics();
+            gameState.log("System Initialized. Awaiting input.");
+        };
     </script>
 </body>
 </html>
